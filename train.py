@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 # hyperparameters
 learning_rate = 1e-3
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
 batch_size = 5
 epochs = 5
 data_path = 'data/3d_MNIST_test/'

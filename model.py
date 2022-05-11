@@ -87,6 +87,9 @@ class UNet_3D(nn.Module):
             skip_connection = skip_connections[ind]
             up_sample = self.up_samples[ind]
             x = up_sample(x)
+            # correct the tensor size
+            if x.shape != skip_connection.shape:
+                x = torch.nn.functional.interpolate(x, skip_connection.shape[2:])
             ind += 1
             x = torch.cat((skip_connection, x), dim=1)
             x = up(x)
@@ -153,6 +156,9 @@ class UNet_3D_with_DS(nn.Module):
             skip_connection = skip_connections[ind]
             up_sample = self.up_samples[ind]
             x = up_sample(x)
+            # correct the tensor size
+            if x.shape != skip_connection.shape:
+                x = torch.nn.functional.interpolate(x, skip_connection.shape[2:])
             ind += 1
             x = torch.cat((skip_connection, x), dim=1)
             x = up(x)
@@ -167,3 +173,6 @@ class UNet_3D_with_DS(nn.Module):
         x = self.FC(x)
 
         return x
+
+
+
