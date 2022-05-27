@@ -10,17 +10,19 @@ import os
 import pandas as pd
 from tqdm import tqdm
 
+NEW_TRAINING = True
+
 # hyperparameters
 learning_rate = 1e-3
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
-batch_size = 5
+batch_size = 10
 epochs = 5
-data_path = 'data/3d_MNIST_test/'
-out_label_num = 2
+data_path = "/export/home/da.li1/dataset/UNet_IDP/UNet_IDP_Stage_1"
+out_label_num = 4
 
 # train and test function
 def train(dataloader, model, loss_fn, optimizer):
-    loop = tqdm(dataloader)
+    loop = tqdm(dataloader, ncols=80)
     size = len(dataloader.dataset)
     model.train()
     for batch, (X, y) in enumerate(loop):
@@ -53,26 +55,40 @@ def test(dataloader, model, loss_fn):
     correct /= size
     print(f"Test Error: \nAccuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
 
+
 # main
 def main():
     # dataset
-    training_data = MNIST_3d_test(data_path + 'training_label.csv', data_path + 'training/')
-    test_data = MNIST_3d_test(data_path + 'test_label.csv', data_path + 'test/')
-    train_dataloader = DataLoader(training_data, batch_size=batch_size, shuffle=False)
-    test_dataloader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
+    training_data = MNIST_3d_test(data_path + '/UNet_IDP_Stage_1.csv', data_path + '/Dataset')
+    test_data = MNIST_3d_test(data_path + '/UNet_IDP_Stage_1.csv', data_path + '/Dataset')
+    train_dataloader = DataLoader(training_data, batch_size=batch_size, shuffle=True)
+    test_dataloader = DataLoader(test_data, batch_size=batch_size, shuffle=True)
 
     # train setup
-    model = UNet_3D_with_DS(in_channels=1, out_num=out_label_num, features_down=[4,16,32], features_up=[16,8]).to(device)
+    if NEW_TRAINING == True:
+        model = UNet_3D_with_DS(in_channels=1, out_num=out_label_num, features_down=[4,16,32,64], features_up=[32,16,8]).to(device)
+    else:
+        path = os.getcwd()
+        model = torch.load(path+'/model/model.pt').to(device)
+        print("Model loaded from: ", path+'/model/model.pt')
+    
+    # loss function
     loss_fn = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+
+    # optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    # optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9)
 
     # train loop
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train(train_dataloader, model, loss_fn, optimizer)
-        test(test_dataloader, model, loss_fn)
+    
+    test(test_dataloader, model, loss_fn)
 
-    torch.save(model, 'model/')
+    path = os.getcwd()
+    torch.save(model, path+'/model/model.pt')
+    print("Model is saved to: ", path+'/model/model.pt')
     print("Done!")
 
 if __name__ == "__main__":
