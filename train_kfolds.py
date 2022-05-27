@@ -14,8 +14,8 @@ from tqdm import tqdm
 
 # hyperparameters
 NEW_TRAINING = True
-DATA_PATH = "/Users/lida/Local_Document/ADNI_dataset/UNet_IDP_Stage_0"
-LABEL_FILE = "UNet_IDP_Stage_0.csv"
+DATA_PATH = "/export/home/da.li1/dataset/UNet_IDP/UNet_IDP_Stage_1"
+LABEL_FILE = "UNet_IDP_Stage_1.csv"
 # random seed
 torch.manual_seed(42)
 np.random.seed(42)
@@ -24,7 +24,7 @@ k_folds = 5
 learning_rate = 1e-3
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 batch_size = 10
-epochs = 5
+epochs = 1
 out_label_num = 4
 
 # train and test function
@@ -79,8 +79,8 @@ def main():
         test_dataloader = DataLoader(dataset, batch_size=batch_size, sampler=test_subsampler)
         break
 
-    print('Training data:\n', train_subsampler)
-    print('Test data:\n', test_subsampler)
+    print('Training data:\n', train_ids)
+    print('Test data:\n', test_ids)
 
     # train setup
     if NEW_TRAINING == True:
@@ -101,8 +101,7 @@ def main():
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         train(train_dataloader, model, loss_fn, optimizer)
-    
-    test(test_dataloader, model, loss_fn)
+        test(test_dataloader, model, loss_fn)
 
     path = os.getcwd()
     torch.save(model, path+'/model/model.pt')
