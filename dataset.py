@@ -26,6 +26,7 @@ test_dataloader = DataLoader(test_data, batch_size=2, shuffle=True)
 
 import os
 import pandas as pd
+import numpy as np
 
 import torch
 from torch.utils.data import Dataset
@@ -41,8 +42,13 @@ class MNIST_3d_test(Dataset):
         return len(self.img_labels)
 
     def __getitem__(self, idx):
+        # img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
+        # image = torch.load(img_path)
         img_path = os.path.join(self.img_dir, self.img_labels.iloc[idx, 0])
-        image = torch.load(img_path)
+        img_path += ".npz"
+        image = np.load(img_path)['img']
+        image = torch.tensor(image, dtype=torch.float32)
+        
         label = self.img_labels.iloc[idx, 1]
         if self.transform:
             image = self.transform(image)
