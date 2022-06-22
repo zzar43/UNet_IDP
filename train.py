@@ -67,6 +67,14 @@ def main():
     # train setup
     if NEW_TRAINING == True:
         model = UNet_3D_with_DS(in_channels=1, out_num=out_label_num, features_down=[4,16,32,64], features_up=[32,16,8]).to(device)
+
+        if torch.cuda.is_available():
+            model.cuda()
+
+        if torch.cuda.device_count() > 1:
+            print("Let's use", torch.cuda.device_count(), "GPUs!")
+            model = nn.DataParallel(model)
+            
     else:
         path = os.getcwd()
         model = torch.load(path+'/model/model.pt').to(device)
