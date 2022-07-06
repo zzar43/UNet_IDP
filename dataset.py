@@ -48,6 +48,9 @@ class MNIST_3d_test(Dataset):
         img_path += ".npz"
         image = np.load(img_path)['img']
         image = torch.tensor(image, dtype=torch.float32)
+
+        # normalize
+        image = image / image.max()
         
         label = self.img_labels.iloc[idx, 1]
         if self.transform:

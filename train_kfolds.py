@@ -21,9 +21,9 @@ torch.manual_seed(42)
 np.random.seed(42)
 # configuration
 k_folds = 5
-learning_rate = 1e-2
+learning_rate = 1e-3
 device = "cuda:1" if torch.cuda.is_available() else "cpu"
-batch_size = 10
+batch_size = 40
 epochs = 20
 out_label_num = 4
 
@@ -92,7 +92,7 @@ def main():
         if torch.cuda.device_count() > 1:
             print("Let's use", torch.cuda.device_count(), "GPUs!")
             model = nn.DataParallel(model)
-            
+
     else:
         path = os.getcwd()
         model = torch.load(path+'/model/model.pt').to(device)
